@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jachin Emmanuel — Number My Days</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f5e6b8;
+    --navy: #1a1f3a;
+    --navy-light: #2a3158;
+    --bg: #0f1225;
+    --card: #181d38;
+    --text: #e8e6f0;
+    --text-dim: #8b8aa0;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --cyan: #22d3ee;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --teal: #2dd4bf;
+    --yellow: #facc15;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(96,165,250,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--navy), var(--card));
+    border-radius: var(--radius);
+    border: 1px solid rgba(201,168,76,0.2);
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--blue), var(--gold));
+  }
+  .profile-pic {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 20px rgba(201,168,76,0.25);
+    flex-shrink: 0;
+  }
+  .header-info h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .header-info .subtitle { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .verse {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold-light);
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+  .verse-ref {
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* DATE NAV */
+  .date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 16px;
+  }
+  .date-nav button {
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .date-nav button:hover { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+  .date-display { font-size: 18px; font-weight: 600; min-width: 240px; text-align: center; }
+  .date-display .day-name { color: var(--gold); }
+  .today-btn {
+    background: transparent !important;
+    border: 1px solid var(--gold) !important;
+    color: var(--gold) !important;
+    font-size: 11px !important;
+    width: auto !important;
+    padding: 0 14px !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .today-btn:hover { background: var(--gold) !important; color: var(--navy) !important; }
+
+  /* STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .stat-value { font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+  .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-change {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .stat-up { color: var(--green); }
+  .stat-down { color: var(--red); }
+  .stat-same { color: var(--text-dim); }
+
+  /* SECTION HEADERS */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .section-title h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+  .section-title .line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+  .section-core h2 { color: var(--gold); }
+  .section-support h2 { color: var(--text-dim); }
+
+  /* TRACKER CARD */
+  .tracker-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .tracker-card.core-card { border-color: rgba(201,168,76,0.15); }
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-header h3 { font-size: 14px; font-weight: 600; }
+  .core-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .save-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+  .save-btn {
+    background: linear-gradient(135deg, var(--gold), #d4a843);
+    color: var(--navy);
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(201,168,76,0.4); }
+
+  /* ACTIVITY ROW */
+  .activity-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    gap: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.15s;
+  }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-row:hover { background: rgba(255,255,255,0.02); }
+
+  .act-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .act-name { flex: 1; font-size: 15px; font-weight: 500; }
+  .act-name .compulsory {
+    display: inline-block;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .hrs-input {
+    width: 75px;
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    padding: 10px 8px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+  .hrs-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  }
+  .hrs-input::placeholder { color: var(--text-dim); font-weight: 400; font-size: 13px; }
+
+  .hrs-label { font-size: 12px; color: var(--text-dim); width: 14px; flex-shrink: 0; }
+
+  .check-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 16px;
+    color: transparent;
+  }
+  .check-btn:hover { border-color: var(--green); }
+  .check-btn.checked { background: var(--green); border-color: var(--green); color: var(--navy); }
+
+  /* OTHER ACTIVITY NAME INPUT */
+  .other-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(255,255,255,0.2);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 2px 4px;
+    width: 120px;
+    margin-left: 4px;
+  }
+  .other-name-input:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+  }
+  .other-name-input::placeholder { color: rgba(255,255,255,0.2); font-style: italic; }
+
+  .limit-tag {
+    display: inline-block;
+    background: rgba(139,138,160,0.15);
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 8px;
+    letter-spacing: 0.3px;
+  }
+  .activity-row.over-limit { background: rgba(248,113,113,0.06); }
+  .activity-row.over-limit .act-name { color: var(--red); }
+  .over-tag {
+    display: inline-block;
+    background: rgba(248,113,113,0.15);
+    color: var(--red);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  /* CHARTS */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px;
+  }
+  .chart-card h2 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .chart-container { position: relative; width: 100%; }
+  .bar-chart-container { position: relative; width: 100%; height: 220px; }
+
+  /* TREND CHART */
+  .trend-section {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .trend-section h2 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--gold); }
+  .trend-chart-container { position: relative; width: 100%; height: 200px; }
+
+  /* REFLECTION */
+  .reflection-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .reflection-card h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .reflection-textarea {
+    width: 100%;
+    min-height: 70px;
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .reflection-textarea:focus { outline: none; border-color: var(--gold); }
+  .reflection-textarea::placeholder { color: var(--text-dim); }
+
+  /* SUMMARY CARD */
+  .summary-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(201,168,76,0.15);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .summary-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .summary-header h2 { font-size: 15px; font-weight: 700; color: var(--gold); }
+  .summary-period { font-size: 12px; color: var(--text-dim); }
+  .summary-body { padding: 20px; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .summary-stat {
+    background: var(--navy-light);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .summary-stat .ss-val { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
+  .summary-stat .ss-lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .day-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 12px;
+    font-size: 13px;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-row .dr-date { width: 90px; font-weight: 600; color: var(--text-dim); flex-shrink: 0; }
+  .day-row .dr-bar { flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; display: flex; }
+  .day-row .dr-core { height: 100%; background: var(--gold); border-radius: 6px 0 0 6px; transition: width 0.3s; }
+  .day-row .dr-ok { height: 100%; background: rgba(139,138,160,0.3); transition: width 0.3s; }
+  .day-row .dr-waste { height: 100%; background: rgba(248,113,113,0.5); border-radius: 0 6px 6px 0; transition: width 0.3s; }
+  .day-row .dr-eff { width: 50px; text-align: right; font-weight: 600; flex-shrink: 0; }
+  .day-row .dr-verdict { width: 24px; text-align: center; flex-shrink: 0; font-size: 16px; }
+
+  .summary-note {
+    background: rgba(201,168,76,0.08);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--gold-light);
+  }
+  .summary-note strong { color: var(--gold); }
+
+  .no-data-msg {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.8;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: var(--navy);
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    box-shadow: 0 8px 30px rgba(74,222,128,0.3);
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* PIN LOCK SCREEN */
+  .lock-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lock-screen.hidden { display: none; }
+  .lock-box {
+    text-align: center;
+    padding: 40px;
+    max-width: 360px;
+    width: 90%;
+  }
+  .lock-box .lock-pic {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 25px rgba(201,168,76,0.3);
+    margin-bottom: 20px;
+  }
+  .lock-box h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .lock-box .lock-verse {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--gold-light);
+    opacity: 0.8;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+  .pin-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .pin-inputs input {
+    width: 52px; height: 58px;
+    background: var(--navy-light);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .pin-inputs input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  }
+  .pin-error {
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 20px;
+    margin-bottom: 8px;
+  }
+  .pin-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 10px; }
+    .header { flex-direction: column; text-align: center; padding: 20px 16px; }
+    .profile-pic { width: 70px; height: 70px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-value { font-size: 22px; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .activity-row { padding: 12px 14px; gap: 10px; }
+    .act-name { font-size: 14px; }
+    .other-name-input { width: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PIN LOCK SCREEN -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-box">
+    <img src="image.jpeg" alt="Jachin" class="lock-pic" onerror="this.style.display='none'">
+    <h1>Jachin Emmanuel</h1>
+    <div class="lock-verse">&ldquo;Teach us to number our days&rdquo;<br><span style="font-size:11px;font-style:normal;color:var(--gold);">&mdash; Psalm 90:12</span></div>
+    <div class="pin-inputs">
+      <input type="password" maxlength="1" inputmode="numeric" id="p1" autocomplete="off">
+      <input type="password" maxlength="1" inputmode="numeric" id="p2" autocomplete="off">
+      <input type="password" maxlength="1" inputmode="numeric" id="p3" autocomplete="off">
+      <input type="password" maxlength="1" inputmode="numeric" id="p4" autocomplete="off">
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-hint">Enter 4-digit PIN to continue</div>
+  </div>
+</div>
+
+<div class="container" id="mainApp" style="display:none;">
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="image.jpeg" alt="Jachin Emmanuel" class="profile-pic" onerror="this.style.display='none'">
+    <div class="header-info">
+      <h1>Jachin Emmanuel</h1>
+      <div class="subtitle">Grade 11 &middot; Holiday Discipline Tracker</div>
+      <div class="verse">
+        &ldquo;Teach us to number our days, that we may gain a heart of wisdom.&rdquo;
+        <span class="verse-ref">&mdash; Psalm 90:12 (NIV)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATE NAV -->
+  <div class="date-nav">
+    <button onclick="changeDate(-1)">&#8592;</button>
+    <div class="date-display" id="dateDisplay"></div>
+    <button onclick="changeDate(1)">&#8594;</button>
+    <button class="today-btn" onclick="goToday()">TODAY</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal" style="color:var(--blue)">0h</div>
+      <div class="stat-label">Total Logged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCore" style="color:var(--gold)">0h</div>
+      <div class="stat-label">Core Hours</div>
+      <div class="stat-change" id="statCoreTrend"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statEfficiency" style="color:var(--green)">0%</div>
+      <div class="stat-label">Efficiency</div>
+      <div class="stat-change" id="statEffTrend"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statWasted" style="color:var(--red)">0h</div>
+      <div class="stat-label">Wasted</div>
+      <div class="stat-change" id="statWastedTrend"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statStreak" style="color:var(--orange)">0</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+  </div>
+
+  <!-- CORE ACTIVITIES -->
+  <div class="section-title section-core">
+    <h2>Core Activities</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="tracker-card core-card">
+    <div id="coreList"></div>
+  </div>
+
+  <!-- SUPPORT ACTIVITIES -->
+  <div class="section-title section-support">
+    <h2>Other Activities</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="tracker-card">
+    <div id="supportList"></div>
+  </div>
+
+  <!-- SAVE -->
+  <div class="save-row">
+    <button class="save-btn" onclick="saveDay()">SAVE DAY</button>
+  </div>
+
+  <!-- QUICK SUMMARY -->
+  <div class="summary-card" id="summaryCard" style="display:none;">
+    <div class="summary-header">
+      <h2>Progress Report</h2>
+      <div class="summary-period" id="summaryPeriod"></div>
+    </div>
+    <div id="summaryBody"></div>
+  </div>
+
+  <!-- PRODUCTIVITY TREND -->
+  <div class="trend-section">
+    <h2>14-Day Trend: Core Hours + Efficiency + Wasted</h2>
+    <div class="trend-chart-container">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h2>Today's Time Split</h2>
+      <div class="chart-container">
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h2>7-Day Total Hours</h2>
+      <div class="bar-chart-container">
+        <canvas id="weekChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="reflection-card">
+    <h2>Daily Reflection &amp; Prayer Notes</h2>
+    <textarea class="reflection-textarea" id="reflection"
+      placeholder="What did I learn today? What can I improve tomorrow? Any prayer points..."></textarea>
+  </div>
+
+  <div class="footer">
+    &ldquo;For I know the plans I have for you,&rdquo; declares the LORD. &mdash; Jeremiah 29:11<br>
+    Built with love for Jachin Emmanuel
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== PIN LOCK =====
+var PIN = '9012'; // Psalm 90:12 — easy to remember!
+var SESSION_KEY = 'je_unlocked';
+
+function checkPIN() {
+  var p = document.getElementById('p1').value +
+          document.getElementById('p2').value +
+          document.getElementById('p3').value +
+          document.getElementById('p4').value;
+  if (p.length < 4) return;
+  if (p === PIN) {
+    sessionStorage.setItem(SESSION_KEY, 'true');
+    unlock();
+  } else {
+    document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
+    document.getElementById('p1').value = '';
+    document.getElementById('p2').value = '';
+    document.getElementById('p3').value = '';
+    document.getElementById('p4').value = '';
+    document.getElementById('p1').focus();
+  }
+}
+
+function unlock() {
+  document.getElementById('lockScreen').classList.add('hidden');
+  document.getElementById('mainApp').style.display = '';
+}
+
+// Auto-focus and auto-advance PIN inputs
+['p1','p2','p3','p4'].forEach(function(id, i, arr) {
+  var el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    if (el.value.length === 1 && i < 3) {
+      document.getElementById(arr[i + 1]).focus();
+    }
+    if (i === 3 && el.value.length === 1) checkPIN();
+  });
+  el.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && el.value === '' && i > 0) {
+      document.getElementById(arr[i - 1]).focus();
+    }
+  });
+});
+
+// Check if already unlocked this session
+if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+  unlock();
+} else {
+  document.getElementById('p1').focus();
+}
+
+// ===== ACTIVITIES =====
+var CORE = [
+  { id: 'bible',      name: 'Bible Reading & Prayer', label: 'B',  color: '#a78bfa', compulsory: '30 min daily' },
+  { id: 'maths',      name: 'Maths',                  label: 'M',  color: '#60a5fa' },
+  { id: 'physics',    name: 'Physics',                 label: 'Ph', color: '#22d3ee' },
+  { id: 'english',    name: 'English',                 label: 'En', color: '#4ade80' },
+  { id: 'basketball', name: 'Basketball',              label: 'Bk', color: '#f87171' },
+];
+
+var SUPPORT = [
+  { id: 'sleep',  name: 'Sleep',         label: 'S',  color: '#8b8aa0', limit: 7 },
+  { id: 'chores', name: 'House Chores',  label: 'HC', color: '#2dd4bf', limit: 1 },
+  { id: 'food',   name: 'Food & Breaks', label: 'F',  color: '#fb923c', limit: 2 },
+  { id: 'tv',     name: 'TV / Shows',    label: 'TV', color: '#f472b6', limit: 2 },
+  { id: 'other1', name: 'Other:',        label: '?',  color: '#facc15', custom: true, limit: 1 },
+  { id: 'other2', name: 'Other:',        label: '?',  color: '#e2e8f0', custom: true, limit: 1 },
+];
+
+var ALL = CORE.concat(SUPPORT);
+var CORE_IDS = CORE.map(function(a) { return a.id; });
+
+// ===== STATE =====
+var currentDate = new Date();
+currentDate.setHours(0,0,0,0);
+
+function dk(d) { return (d || currentDate).toISOString().slice(0,10); }
+function load(k) { try { return JSON.parse(localStorage.getItem('je_' + k)); } catch(e) { return null; } }
+function persist(k, v) { localStorage.setItem('je_' + k, JSON.stringify(v)); }
+
+var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function renderDate() {
+  var d = currentDate;
+  document.getElementById('dateDisplay').innerHTML =
+    '<span class="day-name">' + DAYS[d.getDay()] + '</span>, ' +
+    d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function changeDate(n) {
+  currentDate = new Date(currentDate.getTime() + n * 86400000);
+  renderAll();
+}
+
+function goToday() {
+  currentDate = new Date(); currentDate.setHours(0,0,0,0);
+  renderAll();
+}
+
+// ===== BUILD ROWS =====
+function buildRow(act, saved) {
+  var val = saved[act.id] !== undefined ? saved[act.id] : '';
+  var done = saved[act.id + '_done'] || false;
+  var customName = saved[act.id + '_name'] || '';
+  var hrs = parseFloat(val) || 0;
+  var overLimit = act.limit && hrs > act.limit;
+
+  var row = document.createElement('div');
+  row.className = 'activity-row' + (overLimit ? ' over-limit' : '');
+
+  var comp = act.compulsory ? '<span class="compulsory">' + act.compulsory + '</span>' : '';
+  var limitTag = act.limit ? '<span class="limit-tag">max ' + act.limit + 'h</span>' : '';
+  var overTag = overLimit ? '<span class="over-tag">+' + (hrs - act.limit).toFixed(1) + 'h over!</span>' : '';
+
+  var nameHTML;
+  if (act.custom) {
+    nameHTML = '<div class="act-name">Other: <input type="text" class="other-name-input" ' +
+      'data-nameid="' + act.id + '" value="' + escHtml(customName) + '" placeholder="what?">' +
+      limitTag + overTag + '</div>';
+  } else {
+    nameHTML = '<div class="act-name">' + act.name + comp + limitTag + overTag + '</div>';
+  }
+
+  row.innerHTML =
+    '<div class="act-icon" style="background:' + act.color + '22;color:' + act.color + '">' + act.label + '</div>' +
+    nameHTML +
+    '<input type="number" class="hrs-input" step="0.25" min="0" max="24" ' +
+      'value="' + val + '" placeholder="hrs" data-id="' + act.id + '" data-limit="' + (act.limit || 0) + '" oninput="onInput()">' +
+    '<div class="hrs-label">h</div>' +
+    '<button class="check-btn ' + (done ? 'checked' : '') + '" data-id="' + act.id + '" onclick="toggleDone(this)">&#10003;</button>';
+
+  return row;
+}
+
+function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function renderActivities() {
+  var saved = load(dk()) || {};
+  var coreEl = document.getElementById('coreList');
+  var suppEl = document.getElementById('supportList');
+  coreEl.innerHTML = '';
+  suppEl.innerHTML = '';
+
+  CORE.forEach(function(a) { coreEl.appendChild(buildRow(a, saved)); });
+  SUPPORT.forEach(function(a) { suppEl.appendChild(buildRow(a, saved)); });
+}
+
+function onInput() {
+  // Update over-limit highlighting on rows
+  document.querySelectorAll('.hrs-input').forEach(function(input) {
+    var lim = parseFloat(input.dataset.limit) || 0;
+    var val = parseFloat(input.value) || 0;
+    var row = input.closest('.activity-row');
+    if (lim > 0 && val > lim) {
+      row.classList.add('over-limit');
+      // Update or add over-tag
+      var existing = row.querySelector('.over-tag');
+      var excess = (val - lim).toFixed(1);
+      if (existing) {
+        existing.textContent = '+' + excess + 'h over!';
+      } else {
+        var tag = document.createElement('span');
+        tag.className = 'over-tag';
+        tag.textContent = '+' + excess + 'h over!';
+        row.querySelector('.act-name').appendChild(tag);
+      }
+    } else {
+      row.classList.remove('over-limit');
+      var ot = row.querySelector('.over-tag');
+      if (ot) ot.remove();
+    }
+  });
+  updateStats();
+  updatePie();
+}
+
+function toggleDone(btn) {
+  btn.classList.toggle('checked');
+  updateStats();
+}
+
+// ===== EFFICIENCY LOGIC =====
+// Core hours = always productive
+// Support hours within limit = acceptable (not wasted)
+// Support hours OVER limit = wasted
+// Efficiency = (24h - wasted) / 24h * 100
+// Or more intuitively: Efficiency = productive time / total logged time
+//   where productive = core hrs + support hrs within limits
+
+var LIMITS = {};
+SUPPORT.forEach(function(a) { if (a.limit) LIMITS[a.id] = a.limit; });
+
+function calcStats(data) {
+  var coreHrs = 0;
+  CORE_IDS.forEach(function(id) { coreHrs += parseFloat(data[id]) || 0; });
+
+  var totalHrs = 0;
+  ALL.forEach(function(a) { totalHrs += parseFloat(data[a.id]) || 0; });
+
+  var wastedHrs = 0;
+  SUPPORT.forEach(function(a) {
+    var v = parseFloat(data[a.id]) || 0;
+    var lim = a.limit || 0;
+    if (lim > 0 && v > lim) wastedHrs += (v - lim);
+  });
+
+  var wellSpent = totalHrs - wastedHrs;
+  var efficiency = totalHrs > 0 ? Math.round((wellSpent / totalHrs) * 100) : 0;
+
+  return { coreHrs: coreHrs, totalHrs: totalHrs, wastedHrs: wastedHrs, efficiency: efficiency };
+}
+
+function getFormValues() {
+  var data = {};
+  document.querySelectorAll('.hrs-input').forEach(function(i) { data[i.dataset.id] = i.value; });
+  return data;
+}
+
+function trendHTML(today, yesterday, unit, invert) {
+  if (yesterday === null) return '';
+  var diff = today - yesterday;
+  if (Math.abs(diff) < 0.01) return '<span class="stat-same">same</span>';
+  // For wasted hours, LESS is better so we invert the color
+  var isGood = invert ? diff < 0 : diff > 0;
+  var arrow = diff > 0 ? '&#9650; ' : '&#9660; ';
+  var cls = isGood ? 'stat-up' : 'stat-down';
+  var suffix = unit || 'h';
+  return '<span class="' + cls + '">' + arrow + Math.abs(diff).toFixed(1) + suffix + ' vs yesterday</span>';
+}
+
+function updateStats() {
+  var formData = getFormValues();
+  var s = calcStats(formData);
+
+  document.getElementById('statTotal').textContent = s.totalHrs.toFixed(1) + 'h';
+  document.getElementById('statCore').textContent = s.coreHrs.toFixed(1) + 'h';
+  document.getElementById('statEfficiency').textContent = s.efficiency + '%';
+  document.getElementById('statWasted').textContent = s.wastedHrs.toFixed(1) + 'h';
+
+  // Yesterday comparison
+  var yestKey = dk(new Date(currentDate.getTime() - 86400000));
+  var yest = load(yestKey);
+  if (yest) {
+    var ys = calcStats(yest);
+    document.getElementById('statCoreTrend').innerHTML = trendHTML(s.coreHrs, ys.coreHrs, 'h', false);
+    document.getElementById('statWastedTrend').innerHTML = trendHTML(s.wastedHrs, ys.wastedHrs, 'h', true);
+    var effDiff = s.efficiency - ys.efficiency;
+    if (Math.abs(effDiff) < 1) {
+      document.getElementById('statEffTrend').innerHTML = '<span class="stat-same">same</span>';
+    } else {
+      var cls = effDiff > 0 ? 'stat-up' : 'stat-down';
+      var arr = effDiff > 0 ? '&#9650; ' : '&#9660; ';
+      document.getElementById('statEffTrend').innerHTML = '<span class="' + cls + '">' + arr + Math.abs(effDiff) + '% vs yesterday</span>';
+    }
+  } else {
+    document.getElementById('statCoreTrend').innerHTML = '';
+    document.getElementById('statWastedTrend').innerHTML = '';
+    document.getElementById('statEffTrend').innerHTML = '';
+  }
+
+  // Streak
+  var streak = 0;
+  var d = new Date(); d.setHours(0,0,0,0);
+  while (true) {
+    var data = load(dk(d));
+    if (!data) break;
+    var any = ALL.some(function(a) { return parseFloat(data[a.id]) > 0; });
+    if (!any) break;
+    streak++;
+    d = new Date(d.getTime() - 86400000);
+  }
+  document.getElementById('statStreak').textContent = streak;
+}
+
+// ===== SAVE =====
+function saveDay() {
+  var data = {};
+  document.querySelectorAll('.hrs-input').forEach(function(i) { data[i.dataset.id] = i.value; });
+  document.querySelectorAll('.check-btn').forEach(function(b) { data[b.dataset.id + '_done'] = b.classList.contains('checked'); });
+  document.querySelectorAll('.other-name-input').forEach(function(i) { data[i.dataset.nameid + '_name'] = i.value; });
+  data.reflection = document.getElementById('reflection').value;
+  persist(dk(), data);
+
+  var bibleHrs = parseFloat(data.bible) || 0;
+  if (bibleHrs < 0.5) {
+    showToast('Saved! Remember: 30 min Bible reading is compulsory', true);
+  } else {
+    showToast('Day saved!', false);
+  }
+  updateTrend();
+  updateWeek();
+  updateStats();
+  updateSummary();
+}
+
+function showToast(msg, warn) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = warn ? 'var(--gold)' : 'var(--green)';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ===== PIE CHART =====
+var pieChart;
+function updatePie() {
+  var inputs = document.querySelectorAll('.hrs-input');
+  var values = [], labels = [], colors = [];
+  var inputArr = Array.prototype.slice.call(inputs);
+
+  ALL.forEach(function(act, i) {
+    var v = parseFloat(inputArr[i].value) || 0;
+    if (v > 0) {
+      // For custom "other", use custom name if available
+      var lbl = act.name;
+      if (act.custom) {
+        var nameInput = document.querySelector('[data-nameid="' + act.id + '"]');
+        if (nameInput && nameInput.value) lbl = nameInput.value;
+        else lbl = 'Other';
+      }
+      values.push(v);
+      labels.push(lbl);
+      colors.push(act.color);
+    }
+  });
+
+  if (pieChart) pieChart.destroy();
+  if (values.length === 0) { pieChart = null; return; }
+
+  pieChart = new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+    options: {
+      responsive: true,
+      cutout: '55%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8b8aa0', font: { size: 10 }, padding: 8, usePointStyle: true, pointStyleWidth: 8 } },
+        tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed + 'h'; } } }
+      }
+    }
+  });
+}
+
+// ===== TREND CHART (Core hours + Efficiency over 14 days) =====
+var trendChart;
+function updateTrend() {
+  var labels = [], coreData = [], effData = [], wastedData = [];
+
+  for (var i = 13; i >= 0; i--) {
+    var d = new Date(currentDate.getTime() - i * 86400000);
+    labels.push(d.getDate() + ' ' + MONTHS[d.getMonth()]);
+    var data = load(dk(d));
+    if (data) {
+      var s = calcStats(data);
+      coreData.push(s.coreHrs);
+      effData.push(s.efficiency);
+      wastedData.push(s.wastedHrs);
+    } else {
+      coreData.push(null);
+      effData.push(null);
+      wastedData.push(null);
+    }
+  }
+
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Core Hours',
+          data: coreData,
+          borderColor: '#c9a84c',
+          backgroundColor: 'rgba(201,168,76,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 5,
+          pointBackgroundColor: '#c9a84c',
+          spanGaps: true,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Efficiency %',
+          data: effData,
+          borderColor: '#4ade80',
+          borderDash: [5, 3],
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: '#4ade80',
+          spanGaps: true,
+          yAxisID: 'y1'
+        },
+        {
+          label: 'Wasted Hours',
+          data: wastedData,
+          borderColor: '#f87171',
+          backgroundColor: 'rgba(248,113,113,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: '#f87171',
+          spanGaps: true,
+          yAxisID: 'y'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8b8aa0', font: { size: 10 }, maxRotation: 45 } },
+        y: {
+          position: 'left',
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#c9a84c', callback: function(v) { return v + 'h'; } },
+          min: 0,
+          title: { display: true, text: 'Core Hours', color: '#c9a84c', font: { size: 11 } }
+        },
+        y1: {
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: '#4ade80', callback: function(v) { return v + '%'; } },
+          min: 0, max: 100,
+          title: { display: true, text: 'Efficiency %', color: '#4ade80', font: { size: 11 } }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: '#8b8aa0', usePointStyle: true, font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.datasetIndex === 0) return ' Core: ' + ctx.parsed.y + 'h';
+              if (ctx.datasetIndex === 1) return ' Efficiency: ' + ctx.parsed.y + '%';
+              return ' Wasted: ' + ctx.parsed.y + 'h';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ===== WEEK CHART =====
+var weekChart;
+function updateWeek() {
+  var labels = [], coreTotals = [], okTotals = [], wastedTotals = [];
+
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date(currentDate.getTime() - i * 86400000);
+    labels.push(DAYS[d.getDay()].slice(0,3) + ' ' + d.getDate());
+    var data = load(dk(d));
+    if (data) {
+      var s = calcStats(data);
+      coreTotals.push(s.coreHrs);
+      okTotals.push(Math.max(0, s.totalHrs - s.coreHrs - s.wastedHrs));
+      wastedTotals.push(s.wastedHrs);
+    } else {
+      coreTotals.push(0);
+      okTotals.push(0);
+      wastedTotals.push(0);
+    }
+  }
+
+  if (weekChart) weekChart.destroy();
+  weekChart = new Chart(document.getElementById('weekChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Core', data: coreTotals, backgroundColor: 'rgba(201,168,76,0.7)', borderRadius: 4 },
+        { label: 'OK', data: okTotals, backgroundColor: 'rgba(139,138,160,0.4)', borderRadius: 4 },
+        { label: 'Wasted', data: wastedTotals, backgroundColor: 'rgba(248,113,113,0.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { color: '#8b8aa0', font: { size: 10 } } },
+        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8aa0', callback: function(v) { return v + 'h'; } }, beginAtZero: true }
+      },
+      plugins: {
+        legend: { labels: { color: '#8b8aa0', usePointStyle: true, pointStyleWidth: 8, font: { size: 11 } } },
+        tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.dataset.label + ': ' + ctx.parsed.y + 'h'; } } }
+      }
+    }
+  });
+}
+
+function loadReflection() {
+  var saved = load(dk());
+  document.getElementById('reflection').value = (saved && saved.reflection) || '';
+}
+
+// ===== QUICK SUMMARY FOR PARENTS =====
+function updateSummary() {
+  var card = document.getElementById('summaryCard');
+  var body = document.getElementById('summaryBody');
+
+  // Collect all logged days (up to 14 days back from current view)
+  var loggedDays = [];
+  for (var i = 13; i >= 0; i--) {
+    var d = new Date(currentDate.getTime() - i * 86400000);
+    var data = load(dk(d));
+    if (data) {
+      var s = calcStats(data);
+      if (s.totalHrs > 0) {
+        loggedDays.push({ date: d, data: data, stats: s });
+      }
+    }
+  }
+
+  if (loggedDays.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = '';
+
+  // Period label
+  var first = loggedDays[0].date;
+  var last = loggedDays[loggedDays.length - 1].date;
+  document.getElementById('summaryPeriod').textContent =
+    first.getDate() + ' ' + MONTHS[first.getMonth()] + ' — ' +
+    last.getDate() + ' ' + MONTHS[last.getMonth()] + ' (' + loggedDays.length + ' day' + (loggedDays.length > 1 ? 's' : '') + ')';
+
+  // Aggregate stats
+  var totalCore = 0, totalWasted = 0, totalAll = 0, totalEff = 0;
+  var bestDay = null, bestEff = -1;
+  var bibleCount = 0;
+
+  // Per-activity totals
+  var actTotals = {};
+  ALL.forEach(function(a) { actTotals[a.id] = 0; });
+
+  loggedDays.forEach(function(entry) {
+    totalCore += entry.stats.coreHrs;
+    totalWasted += entry.stats.wastedHrs;
+    totalAll += entry.stats.totalHrs;
+    totalEff += entry.stats.efficiency;
+    if (entry.stats.efficiency > bestEff) { bestEff = entry.stats.efficiency; bestDay = entry; }
+    if ((parseFloat(entry.data.bible) || 0) >= 0.5) bibleCount++;
+    ALL.forEach(function(a) { actTotals[a.id] += parseFloat(entry.data[a.id]) || 0; });
+  });
+
+  var avgEff = Math.round(totalEff / loggedDays.length);
+  var avgCore = (totalCore / loggedDays.length).toFixed(1);
+
+  // Find top core activity
+  var topAct = null, topHrs = 0;
+  CORE.forEach(function(a) {
+    if (actTotals[a.id] > topHrs) { topHrs = actTotals[a.id]; topAct = a; }
+  });
+
+  // Find most wasted support activity
+  var worstAct = null, worstExcess = 0;
+  SUPPORT.forEach(function(a) {
+    if (!a.limit) return;
+    var excess = 0;
+    loggedDays.forEach(function(entry) {
+      var v = parseFloat(entry.data[a.id]) || 0;
+      if (v > a.limit) excess += (v - a.limit);
+    });
+    if (excess > worstExcess) { worstExcess = excess; worstAct = a; }
+  });
+
+  // Efficiency trend (first half vs second half)
+  var trendMsg = '';
+  if (loggedDays.length >= 4) {
+    var half = Math.floor(loggedDays.length / 2);
+    var firstHalfEff = 0, secondHalfEff = 0;
+    for (var j = 0; j < half; j++) firstHalfEff += loggedDays[j].stats.efficiency;
+    for (var j = half; j < loggedDays.length; j++) secondHalfEff += loggedDays[j].stats.efficiency;
+    firstHalfEff = Math.round(firstHalfEff / half);
+    secondHalfEff = Math.round(secondHalfEff / (loggedDays.length - half));
+    var trendDiff = secondHalfEff - firstHalfEff;
+    if (trendDiff > 3) trendMsg = 'Efficiency is <strong style="color:#4ade80">improving &#9650; ' + trendDiff + '%</strong> in recent days. Keep it up!';
+    else if (trendDiff < -3) trendMsg = 'Efficiency has <strong style="color:#f87171">dipped &#9660; ' + Math.abs(trendDiff) + '%</strong> recently. Time to refocus!';
+    else trendMsg = 'Efficiency is <strong>steady</strong> across this period.';
+  }
+
+  // Build HTML
+  var html = '<div class="summary-body">';
+
+  // Aggregate stats grid
+  html += '<div class="summary-grid">';
+  html += '<div class="summary-stat"><div class="ss-val" style="color:var(--gold)">' + avgCore + 'h</div><div class="ss-lbl">Avg Core / Day</div></div>';
+  html += '<div class="summary-stat"><div class="ss-val" style="color:var(--green)">' + avgEff + '%</div><div class="ss-lbl">Avg Efficiency</div></div>';
+  html += '<div class="summary-stat"><div class="ss-val" style="color:var(--red)">' + totalWasted.toFixed(1) + 'h</div><div class="ss-lbl">Total Wasted</div></div>';
+  html += '<div class="summary-stat"><div class="ss-val" style="color:var(--purple)">' + bibleCount + '/' + loggedDays.length + '</div><div class="ss-lbl">Bible Days</div></div>';
+  html += '</div>';
+
+  // Day-by-day bars
+  html += '<div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);font-weight:600;">DAY-BY-DAY BREAKDOWN</div>';
+  loggedDays.forEach(function(entry) {
+    var d = entry.date;
+    var s = entry.stats;
+    var dateStr = DAYS[d.getDay()].slice(0,3) + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+    var maxHrs = 24;
+    var coreW = (s.coreHrs / maxHrs * 100).toFixed(1);
+    var okW = (Math.max(0, s.totalHrs - s.coreHrs - s.wastedHrs) / maxHrs * 100).toFixed(1);
+    var wasteW = (s.wastedHrs / maxHrs * 100).toFixed(1);
+    var effColor = s.efficiency >= 80 ? 'var(--green)' : s.efficiency >= 60 ? 'var(--gold)' : 'var(--red)';
+    var verdict = s.efficiency >= 80 ? '&#9733;' : s.efficiency >= 60 ? '&#9679;' : '&#9888;';
+
+    html += '<div class="day-row">';
+    html += '<div class="dr-date">' + dateStr + '</div>';
+    html += '<div class="dr-bar">';
+    html += '<div class="dr-core" style="width:' + coreW + '%" title="Core: ' + s.coreHrs.toFixed(1) + 'h"></div>';
+    html += '<div class="dr-ok" style="width:' + okW + '%" title="OK: ' + (s.totalHrs - s.coreHrs - s.wastedHrs).toFixed(1) + 'h"></div>';
+    html += '<div class="dr-waste" style="width:' + wasteW + '%" title="Wasted: ' + s.wastedHrs.toFixed(1) + 'h"></div>';
+    html += '</div>';
+    html += '<div class="dr-eff" style="color:' + effColor + '">' + s.efficiency + '%</div>';
+    html += '<div class="dr-verdict">' + verdict + '</div>';
+    html += '</div>';
+  });
+
+  // Insight note
+  html += '<div class="summary-note">';
+  if (topAct) html += '<strong>Top focus:</strong> ' + topAct.name + ' (' + topHrs.toFixed(1) + 'h total)<br>';
+  if (worstAct && worstExcess > 0) html += '<strong>Needs attention:</strong> ' + worstAct.name + ' exceeded limit by ' + worstExcess.toFixed(1) + 'h total<br>';
+  html += '<strong>Bible commitment:</strong> ' + bibleCount + ' out of ' + loggedDays.length + ' days met the 30-min goal';
+  if (bibleCount === loggedDays.length) html += ' — Perfect!';
+  html += '<br>';
+  if (trendMsg) html += trendMsg;
+  if (bestDay && loggedDays.length > 1) {
+    var bd = bestDay.date;
+    html += '<br><strong>Best day:</strong> ' + DAYS[bd.getDay()] + ' ' + bd.getDate() + ' ' + MONTHS[bd.getMonth()] + ' (' + bestEff + '% efficiency)';
+  }
+  html += '</div>';
+
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function renderAll() {
+  renderDate();
+  renderActivities();
+  updateStats();
+  updatePie();
+  updateTrend();
+  updateWeek();
+  loadReflection();
+  updateSummary();
+}
+
+renderAll();
+</script>
+</body>
+</html>
